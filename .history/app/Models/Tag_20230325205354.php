@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
-class Category extends Model
+class Tag extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = ['name', 'slug'];
 
     public function posts(){
-        //Un post tiene mucha categoria
-        return $this->hasMany(Post::class);
+        //Un tag puede tener muchos posts
+        return $this->belongsToMany(Post::class);
     }
 }
