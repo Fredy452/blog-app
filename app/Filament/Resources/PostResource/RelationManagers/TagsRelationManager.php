@@ -1,13 +1,10 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\PostResource\RelationManagers;
 
-use App\Filament\Resources\TagResource\Pages;
-use App\Filament\Resources\TagResource\RelationManagers;
-use App\Models\Tag;
 use Filament\Forms;
 use Filament\Resources\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,18 +14,18 @@ use Closure;
 use Illuminate\Support\Str;
 use Filament\Forms\Components\Card;
 
-class TagResource extends Resource
+class TagsRelationManager extends RelationManager
 {
-    protected static ?string $model = Tag::class;
+    protected static string $relationship = 'tags';
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 //creamos un card para agregar dentrp el formulario
-              Card::make()->schema([
+                Card::make()->schema([
                 //vamos a construir el formulario
                     TextInput::make('name')->reactive()
                     ->afterStateUpdated(function (Closure $set, $state) {
@@ -48,42 +45,20 @@ class TagResource extends Resource
                 Tables\Columns\TextColumn::make('slug')->limit('50')
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                //
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+                Tables\Actions\AttachAction::make(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DetachAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
+                Tables\Actions\DetachBulkAction::make(),
                 Tables\Actions\DeleteBulkAction::make(),
-                Tables\Actions\ForceDeleteBulkAction::make(),
-                Tables\Actions\RestoreBulkAction::make(),
             ]);
-    }
-    
-    public static function getRelations(): array
-    {
-        return [
-            RelationManagers\PostsRelationManager::class,
-        ];
-    }
-    
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListTags::route('/'),
-            'create' => Pages\CreateTag::route('/create'),
-            'view' => Pages\ViewTag::route('/{record}'),
-            'edit' => Pages\EditTag::route('/{record}/edit'),
-        ];
     }    
-    
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
 }

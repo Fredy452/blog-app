@@ -1,13 +1,10 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\CategoryResource\RelationManagers;
 
-use App\Filament\Resources\PostResource\Pages;
-use App\Filament\Resources\PostResource\RelationManagers;
-use App\Models\Post;
 use Filament\Forms;
 use Filament\Resources\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,24 +26,20 @@ use Filament\Forms\Components\Toggle;
 // Spatye
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
-use Filament\Forms\Components\SpatieTagsInput;
 // TagResource
 use Filament\Forms\Components\TagsInput;
-// filters
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 
-class PostResource extends Resource
+class PostsRelationManager extends RelationManager
 {
-    protected static ?string $model = Post::class;
+    protected static string $relationship = 'posts';
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static ?string $recordTitleAttribute = 'title';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                 //vamos a construir el formulario
+                  //Forms\Components\TextInput::make('title'),
                     Card::make()->schema([
                         // Creamos el select
                         Select::make('category_id')->required()
@@ -58,7 +51,8 @@ class PostResource extends Resource
                         TextInput::make('slug')->required(),
                         SpatieMediaLibraryFileUpload::make('thumbnail')->collection('posts'),
                         RichEditor::make('content'),
-                        Toggle::make('is_published') 
+                        TagsInput::make('tags'),
+                        Toggle::make('is_published')
                     ])
             ]);
     }
@@ -67,57 +61,33 @@ class PostResource extends Resource
     {
         return $table
             ->columns([
-                 //Mostramos los datos de la tabla
+                    //Mostramos los datos de la tabla
                     TextColumn::make('id')->sortable(),
-                    TextColumn::make('title')->limit('30')->sortable()->searchable(),
-                    TextColumn::make('slug')->limit('30'),
+                    TextColumn::make('title')->limit('50')->sortable(),
                     BooleanColumn::make('is_published'),
-                    SpatieMediaLibraryImageColumn::make('thumbnail')->collection('posts')
-            ])
+                ])
             ->filters([
-                    // Filtrar por posts publicados
-                    Filter::make('Publicados')->toggle()
-                        ->query(fn (Builder $query): Builder => $query->where('is_published', true)),
-                // filtrar por posts no Publicados
-                    Filter::make('No Publicados')->toggle()
-                        ->query(fn (Builder $query): Builder => $query->where('is_published', false)),
-                // Filtrar categoria
-                SelectFilter::make('Categoria')->relationship('category', 'name'),
-
                 Tables\Filters\TrashedFilter::make()
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-                Tables\Actions\ForceDeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
+                Tables\Actions\ForceDeleteBulkAction::make(),
             ]);
-    }
-    
-    public static function getRelations(): array
-    {
-        return [
-            RelationManagers\TagsRelationManager::class,
-        ];
-    }
-    
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListPosts::route('/'),
-            'create' => Pages\CreatePost::route('/create'),
-            'view' => Pages\ViewPost::route('/{record}'),
-            'edit' => Pages\EditPost::route('/{record}/edit'),
-        ];
     }    
     
-    public static function getEloquentQuery(): Builder
+    protected function getTableQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        return parent::getTableQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
