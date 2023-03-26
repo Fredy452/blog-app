@@ -44,8 +44,8 @@ class TagResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->limit('50')->searchable(),
-                Tables\Columns\TextColumn::make('slug')->limit('50')
+                Tables\Columns\TextColumn::make('name')->limit('50')->sortable(),
+                Tables\Columns\TextColumn::make('slug')>limit('50')
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
