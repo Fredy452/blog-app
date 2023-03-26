@@ -9,11 +9,4 @@ use Filament\Resources\Pages\CreateRecord;
 class CreatePost extends CreateRecord
 {
     protected static string $resource = PostResource::class;
-
-
-         // Despues de crear el post redirijimos al index
-        protected function getRedirectUrl(): string
-        {
-            return $this->getResource()::getUrl('index');
-        }
 }

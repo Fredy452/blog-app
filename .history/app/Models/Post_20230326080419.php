@@ -18,11 +18,6 @@ class Post extends Model implements HasMedia
 
     protected $fillable = ['category_id', 'title', 'slug', 'content', 'is_published'];
 
-    protected $casts = [
-        'is_published' => 'boolean',
-        'tags' => 'array',
-    ];
-
     public function category(){
         //Una post pertenece a una categoria
         return $this->belongsTo(Category::class);
@@ -31,14 +26,6 @@ class Post extends Model implements HasMedia
     public function tags(){
         //Un post pertenece a muchos tags
         return $this->belongsToMany(Tag::class);
-    }
-
-    public function registerMediaConversions(Media $media = null): void
-    {
-        $this
-            ->addMediaConversion('preview')
-            ->fit(Manipulations::FIT_CROP, 300, 300)
-            ->nonQueued();
     }
 
 }

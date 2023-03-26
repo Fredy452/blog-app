@@ -75,21 +75,11 @@ class PostResource extends Resource
                     SpatieMediaLibraryImageColumn::make('thumbnail')->collection('posts')
             ])
             ->filters([
-                    // Filtrar por posts publicados
-                    Filter::make('Publicados')->toggle()
-                        ->query(fn (Builder $query): Builder => $query->where('is_published', true)),
-                // filtrar por posts no Publicados
-                    Filter::make('No Publicados')->toggle()
-                        ->query(fn (Builder $query): Builder => $query->where('is_published', false)),
-                // Filtrar categoria
-                SelectFilter::make('Categoria')->relationship('category', 'name'),
-
-                Tables\Filters\TrashedFilter::make()
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
