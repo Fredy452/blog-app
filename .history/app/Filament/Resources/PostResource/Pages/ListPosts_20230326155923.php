@@ -10,14 +10,6 @@ class ListPosts extends ListRecords
 {
     protected static string $resource = PostResource::class;
 
-    protected function getHeaderWidgets(): array
-        {
-            return [
-                PostResource\Widgets\StatsOverview::class,
-                //PostResource\Widgets\PostsChart::class,
-            ];
-        }
-
     protected function getActions(): array
     {
         return [

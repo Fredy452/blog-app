@@ -14,7 +14,7 @@ class ListPosts extends ListRecords
         {
             return [
                 PostResource\Widgets\StatsOverview::class,
-                //PostResource\Widgets\PostsChart::class,
+                PostResource\Widgets\PostsChart::class,
             ];
         }
 

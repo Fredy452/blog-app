@@ -40,7 +40,7 @@ class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
      // blobal searchable
-     protected static ?string $recordTitleAttribute = 'title';
+     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $navigationIcon = 'heroicon-o-collection';
 
@@ -104,14 +104,6 @@ class PostResource extends Resource
     {
         return [
             RelationManagers\TagsRelationManager::class,
-        ];
-    }
-
-    public static function getWidgets(): array
-    {
-        return [
-            PostResource\Widgets\StatsOverview::class,
-            //PostResource\Widgets\PostsChart::class,
         ];
     }
     

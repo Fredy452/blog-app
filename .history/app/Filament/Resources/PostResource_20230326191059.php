@@ -106,14 +106,6 @@ class PostResource extends Resource
             RelationManagers\TagsRelationManager::class,
         ];
     }
-
-    public static function getWidgets(): array
-    {
-        return [
-            PostResource\Widgets\StatsOverview::class,
-            //PostResource\Widgets\PostsChart::class,
-        ];
-    }
     
     public static function getPages(): array
     {
