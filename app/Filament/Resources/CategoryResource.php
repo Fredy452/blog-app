@@ -12,6 +12,11 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\TextInput;
+use Closure;
+use Illuminate\Support\Str;
+
 
 class CategoryResource extends Resource
 {
@@ -23,12 +28,15 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255),
+               //creamos un card para agregar dentrp el formulario
+                Card::make()->schema([
+                    //vamos a construir el formulario
+                    TextInput::make('name')->reactive()
+                    ->afterStateUpdated(function (Closure $set, $state) {
+                        $set('slug', Str::slug($state));
+                    })->required(),
+                    TextInput::make('slug')->required()
+                ])
             ]);
     }
 
