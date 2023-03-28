@@ -1,0 +1,135 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\PostResource\Pages;
+use App\Filament\Resources\PostResource\RelationManagers;
+use App\Models\Post;
+use Filament\Forms;
+use Filament\Resources\Form;
+use Filament\Resources\Resource;
+use Filament\Resources\Table;
+use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+// Para armar formulario
+use Closure;
+use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Str;
+use Filament\Forms\Components\Card;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BooleanColumn;
+
+// Select
+use Filament\Forms\Components\Select;
+// text
+use Filament\Forms\Components\RichEditor;
+// togle
+use Filament\Forms\Components\Toggle;
+// Spatye
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
+use Filament\Forms\Components\SpatieTagsInput;
+// TagResource
+use Filament\Forms\Components\TagsInput;
+// filters
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+
+class PostResource extends Resource
+{
+    protected static ?string $model = Post::class;
+     // blobal searchable
+     protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?string $navigationIcon = {{ svg('gmdi-post-add-tt') }};
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                 //vamos a construir el formulario
+                    Card::make()->schema([
+                        // Creamos el select
+                        Select::make('category_id')->required()
+                        ->relationship('category', 'name'),
+                        TextInput::make('title')->reactive()
+                        ->afterStateUpdated(function (Closure $set, $state) {
+                            $set('slug', Str::slug($state));
+                        })->required(),
+                        TextInput::make('slug')->required(),
+                        SpatieMediaLibraryFileUpload::make('thumbnail')->collection('posts'),
+                        RichEditor::make('content'),
+                        Toggle::make('is_published') 
+                    ])
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                 //Mostramos los datos de la tabla
+                    TextColumn::make('id')->sortable(),
+                    TextColumn::make('title')->limit('30')->sortable()->searchable(),
+                    TextColumn::make('slug')->limit('30'),
+                    BooleanColumn::make('is_published'),
+                    SpatieMediaLibraryImageColumn::make('thumbnail')->collection('posts')
+            ])
+            ->filters([
+                    // Filtrar por posts publicados
+                    Filter::make('Publicados')->toggle()
+                        ->query(fn (Builder $query): Builder => $query->where('is_published', true)),
+                // filtrar por posts no Publicados
+                    Filter::make('No Publicados')->toggle()
+                        ->query(fn (Builder $query): Builder => $query->where('is_published', false)),
+                // Filtrar categoria
+                SelectFilter::make('Categoria')->relationship('category', 'name'),
+
+                Tables\Filters\TrashedFilter::make()
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\ForceDeleteBulkAction::make(),
+                Tables\Actions\RestoreBulkAction::make(),
+            ]);
+    }
+    
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\TagsRelationManager::class,
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            PostResource\Widgets\StatsOverview::class,
+            //PostResource\Widgets\PostsChart::class,
+        ];
+    }
+    
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPosts::route('/'),
+            'create' => Pages\CreatePost::route('/create'),
+            'view' => Pages\ViewPost::route('/{record}'),
+            'edit' => Pages\EditPost::route('/{record}/edit'),
+        ];
+    }    
+    
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+}
